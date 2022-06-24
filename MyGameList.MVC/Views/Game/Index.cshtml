@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Game Page";
+}
+@model MyGameList.Models.GameViewModel
+
+<div>
+    <h1 class="display-4">@ViewBag.username's Game List</h1>
+
+    <div id="PlaceHolderHere"></div>
+    <button type="button" class="btn btn-primary addGame" data-url="@Url.Action("Create")">Add Game</button>
+    <button type="button" class="btn btn-danger logout">Logout</button>
+    <div  class="">
+        @if (Model?.Games != null)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Rating</th>
+                        <th>Genre</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Games)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Rating</td>
+                        <td>@item.Genre</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-primary editGame" data-url="@Url.Action("Update")" value="@item.Id">Edit</button>
+                            <button type="button" class="btn btn-danger removeGame"data-url="@Url.Action("Delete")" value="@item.Id">Remove</button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div>
+                There are no games yet.
+            </div>
+        }
+    </div>
+
+</div>
