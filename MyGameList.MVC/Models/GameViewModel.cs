@@ -25,15 +25,5 @@ namespace MyGameList.Models
         public decimal Rating { get; set; }
         [Required]
         public string? Genre { get; set; }
-        public GameRequestDTO CreateDto()
-        {
-            return new GameRequestDTO
-            {
-                Id = Id,
-                Name = Name,
-                Rating = Rating,
-                Genre = Genre
-            };
-        }
     }
 }

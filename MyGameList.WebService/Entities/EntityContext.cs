@@ -16,12 +16,12 @@ namespace MyGameList.Entities
             {
                 if (!optionsBuilder.IsConfigured)
                 {
+                    var parent = Directory.GetParent(Directory.GetCurrentDirectory()).ToString();
                     ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-                    string path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
+                    string path = Path.Combine(parent, "appsettings.json");
                     configurationBuilder.AddJsonFile(path, optional: false);
                     IConfigurationRoot configurationRoot = configurationBuilder.Build();
 
-                    //var ConnectionString = "Data Source=../MyGameList.WebService/PsdDB.db;";
                     var ConnectionString = configurationRoot.GetSection("ConnectionStrings").GetSection("PsdDB").Value;
                     optionsBuilder.UseSqlite(ConnectionString);
                 }

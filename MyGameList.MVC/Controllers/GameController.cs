@@ -5,6 +5,9 @@ using MyGameList.WebService.Application;
 using MyGameList.Domain.Request;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Session;
+using MyGameList.Helper;
+using MyGameList.Domain.Response;
+using Newtonsoft.Json;
 
 namespace MyGameList.Controllers;
 
@@ -19,22 +22,22 @@ public class GameController : Controller
             return RedirectToAction("Index", "Login");
         }
         ViewBag.username = HttpContext.Session.GetString("UserName");
-        var result = GameManager.GetAllGame(GetUserId());
 
-        var dto = new GameViewModel
+        var baseUrl = GetApiUrl() + "get_all";
+        var request = new GameRequestDTO
         {
-            Games = (from r in result
-                    select new Game
-                    {
-                        Id = r.Id,
-                        Name = r.Name,
-                        Rating = r.Rating,
-                        Genre = r.Genre
-                    }).ToList()
+            UserId = GetUserId()
+        };
+        
+        var result = HttpHelper.Post(baseUrl, request).Result;
+        var response = JsonConvert.DeserializeObject<List<Game>>(result.Content.ReadAsStringAsync().Result);
+        var game = new GameViewModel
+        {
+            Games = response
         };
 
-        return View(dto);
-    } 
+        return View(game);
+    }
 
     [HttpGet]
     [Route("Create")]
@@ -53,30 +56,39 @@ public class GameController : Controller
         if (!ModelState.IsValid)
         {
             return View(game);
-            //return PartialView("_GameModelPartial",game);
-            //return RedirectToAction("index");
         }
-        var req = game.CreateDto();
-        req.UserId = GetUserId();
-        GameManager.AddGame(req);
-        //var redirectUrl = new UrlHelper(Request.RequestContext).Action("Index", "Controller");
-        //return Json(new { Url = redirectUrl });
-        return PartialView("_GameModelPartial", game);
+
+        var baseUrl = GetApiUrl() + "add";
+        var request = new GameRequestDTO
+        {
+            Id = game.Id,
+            UserId = GetUserId(),
+            Name = game.Name,
+            Rating = game.Rating,
+            Genre = game.Genre
+        };
+
+        var result = HttpHelper.Post(baseUrl, request).Result;
+        if (result.IsSuccessStatusCode)
+        {
+            return PartialView("_GameModelPartial", game);
+        }
+        else return View();
     }
 
     [HttpGet]
     [Route("Update/{id}")]
     public IActionResult Edit(Guid id)
     {
-        var data = GameManager.GetGame(id);
-        var game = new Game
+        var baseUrl = GetApiUrl() + "get";
+        var request = new GameRequestDTO
         {
-            Id = data.Id,
-            UserId = GetUserId(),
-            Name = data.Name,
-            Rating = data.Rating,
-            Genre = data.Genre
+            Id = id
         };
+
+        var result = HttpHelper.Post(baseUrl, request).Result;
+        var game = JsonConvert.DeserializeObject<Game>(result.Content.ReadAsStringAsync().Result);
+        
         ViewBag.Title = "Edit";
         ViewBag.Action = "Update";
         return PartialView("_GameModelPartial", game);
@@ -90,11 +102,23 @@ public class GameController : Controller
         {
             return View(game);
         }
-        var req = game.CreateDto();
-        req.UserId = GetUserId();
-        GameManager.EditGame(req);
-        //return RedirectToAction("Index");
-        return PartialView("_GameModelPartial", game);
+
+        var baseUrl = GetApiUrl() + "edit";
+        var request = new GameRequestDTO
+        {
+            Id = game.Id,
+            UserId = GetUserId(),
+            Name = game.Name,
+            Rating = game.Rating,
+            Genre = game.Genre
+        };
+
+        var result = HttpHelper.Post(baseUrl, request).Result;
+        if (result.IsSuccessStatusCode)
+        {
+            return PartialView("_GameModelPartial", game);
+        }
+        else return View();
     }
 
     [HttpGet]
@@ -108,8 +132,18 @@ public class GameController : Controller
     [Route("Delete")]
     public IActionResult Remove(Game game)
     {
-        GameManager.RemoveGame(game.Id);
-        return PartialView("_DeleteGamePartial");
+        var baseUrl = GetApiUrl() + "remove";
+        var request = new GameRequestDTO
+        {
+            Id = game.Id
+        };
+
+        var result = HttpHelper.Post(baseUrl, request).Result;
+        if (result.IsSuccessStatusCode)
+        {
+            return PartialView("_GameModelPartial", game);
+        }
+        else return View();
     }
 
     [HttpGet]
@@ -124,5 +158,10 @@ public class GameController : Controller
     {
         _ = Guid.TryParse(HttpContext.Session.GetString("UserId"), out Guid userId);
         return userId;
+    }
+
+    public string GetApiUrl()
+    {
+        return "https://" + HttpContext.Request.Host.Value + "/game_api/";
     }
 }

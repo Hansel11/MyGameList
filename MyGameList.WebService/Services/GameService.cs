@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 using MyGameList.WebService.Application;
-using MyGameList.WebService.Output;
 using MyGameList.Domain.Response;
+using MyGameList.Domain.Request;
+using psdtest.Domain.Response;
 
 namespace MyGameList.WebService.Services
 {
@@ -21,31 +22,91 @@ namespace MyGameList.WebService.Services
         {
         }
 
-        /// <summary>
-        /// Get All Test List
-        /// </summary>
-        /// <remarks>
-        /// Sample request:
-        ///
-        ///     GET /test
-        ///
-        /// </remarks>
-        /// <returns>A list of Test</returns>
-        /// <response code="200">Returns a list of Test</response>
-        [HttpGet]
+        [HttpPost]
+        [Route("get")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(GameResponseDTO), StatusCodes.Status200OK)]
-        public IActionResult GetGame()
+        public IActionResult GetGame([FromBody] GameRequestDTO req)
         {
             try
             {
-                
-                var objJSON = GameManager.GetGame(Guid.Parse("3E815376-FC29-44AA-9B8B-580B179BAB30"));
+                var objJSON = GameManager.GetGame(req.Id);
+                return new OkObjectResult(objJSON);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new MessageResponseDTO(ex));
+            }
+        }
+
+        [HttpPost]
+        [Route("get_all")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(List<GameResponseDTO>), StatusCodes.Status200OK)]
+        public IActionResult GetAllGame([FromBody] GameRequestDTO req)
+        {
+            try
+            {
+                var objJSON = GameManager.GetAllGame(req.UserId);
                 return new OkObjectResult(objJSON);
             }
             catch(Exception ex)
             {
-                return StatusCode(500, new OutputBase(ex));
+                return StatusCode(500, new MessageResponseDTO(ex));
+            }
+        }
+
+        [HttpPost]
+        [Route("add")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(MessageResponseDTO), StatusCodes.Status200OK)]
+        public IActionResult AddGame([FromBody] GameRequestDTO req)
+        {
+            try
+            {
+                GameManager.AddGame(req);
+                var objJSON = new MessageResponseDTO();
+                return new OkObjectResult(objJSON);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new MessageResponseDTO(ex));
+            }
+        }
+
+        [HttpPost]
+        [Route("edit")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(MessageResponseDTO), StatusCodes.Status200OK)]
+        public IActionResult EditGame([FromBody] GameRequestDTO req)
+        {
+            try
+            {
+                GameManager.EditGame(req);
+                var objJSON = new MessageResponseDTO();
+                return new OkObjectResult(objJSON);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new MessageResponseDTO(ex));
+            }
+        }
+
+        [HttpPost]
+        [Route("remove")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(MessageResponseDTO), StatusCodes.Status200OK)]
+        public IActionResult RemoveGame([FromBody] GameRequestDTO req)
+        {
+            try
+            {
+                GameManager.RemoveGame(req.Id);
+                var objJSON = new MessageResponseDTO();
+                return new OkObjectResult(objJSON);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new MessageResponseDTO(ex));
             }
         }
     }
