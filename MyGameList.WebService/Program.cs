@@ -31,10 +31,6 @@ namespace MyGameList.WebService
                 .UseStartup<Startup>()
                 .UseUrls(Configuration.GetSection("HostingURL").Value)
                 .UseIISIntegration()
-                .UseIIS();
-                //.ConfigureLogging(logging => {
-                //    logging.AddApplicationInsights(Configuration.GetSection("ApplicationInsights:InstrumentationKey").Value);
-                //    logging.AddFilter<ApplicationInsightsLoggerProvider>("", LogLevel.Information);
-                //});        
+                .UseIIS();   
     }
 }

@@ -6,7 +6,6 @@ namespace MyGameList.Models
 {
     public class GameViewModel
     {
-        public Guid UserId { get; set; }
         public List<Game> Games { get; set; }
         public GameViewModel()
         {
@@ -17,7 +16,6 @@ namespace MyGameList.Models
     public class Game
     {
         public Guid Id { get; set; }
-        public Guid UserId { get; set; }
         [Required]
         public string? Name { get; set; }
         [Required]

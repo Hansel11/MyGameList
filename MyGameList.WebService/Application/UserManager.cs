@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using psdtest.Domain.Response;
 
 namespace MyGameList.WebService.Application
 {
@@ -17,7 +18,7 @@ namespace MyGameList.WebService.Application
         {
         }
 
-        public static Guid? LoginUser(UserRequestDTO req)
+        public static UserResponseDTO LoginUser(UserRequestDTO req)
         {
             try
             {
@@ -28,8 +29,15 @@ namespace MyGameList.WebService.Application
                                   select u).FirstOrDefault();
 
                     if (user == null) return null;
-                    
-                    if (user.Password == req.Password) return user.Id;
+
+                    if (user.Password == req.Password)
+                    {
+                        var res = new UserResponseDTO
+                        {
+                            UserId = user.Id
+                        };
+                        return res;
+                    }
                 }
             }
             catch (Exception ex)
@@ -39,7 +47,7 @@ namespace MyGameList.WebService.Application
             return null;
         }
 
-        public static bool RegisterUser(UserRequestDTO req)
+        public static UserResponseDTO RegisterUser(UserRequestDTO req)
         {
             try
             {
@@ -48,7 +56,7 @@ namespace MyGameList.WebService.Application
                     var uname = (from u in context.Data
                                  where u.Username == req.Username
                                  select u).FirstOrDefault();
-                    if (uname != null) return false;
+                    if (uname != null) return null;
 
                     var user = new MsUser
                     {
@@ -58,7 +66,12 @@ namespace MyGameList.WebService.Application
                     };
                     context.Add(user);
                     context.SaveChanges();
-                    return true;
+
+                    var res = new UserResponseDTO
+                    {
+                        UserId = user.Id
+                    };
+                    return res;
                 }
             }
             catch (Exception ex)

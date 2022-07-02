@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using MyGameList.Entities;
-using MyGameList.Domain.PsdDB;
 using System;
 using System.IO;
 using System.Linq;
@@ -35,16 +33,11 @@ namespace MyGameList.WebService
 
             services.AddControllers();
             services.AddMvcCore().AddApiExplorer();
-            //services.AddApplicationInsightsTelemetry();
 
             services.AddMvc();
 
             // Add functionality to inject IOptions<T>
             services.AddOptions();
-
-
-            // Inject here
-            //services.AddScoped();
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -110,9 +103,6 @@ namespace MyGameList.WebService
             }
 
             app.UseRouting();
-
-            //app.UseMiddleware<RouteGuardMiddleware>();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

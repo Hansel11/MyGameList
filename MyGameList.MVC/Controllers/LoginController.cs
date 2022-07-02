@@ -4,6 +4,9 @@ using MyGameList.WebService.Application;
 using MyGameList.Domain.Request;
 using Microsoft.AspNetCore.Session;
 using System.Security.Cryptography;
+using MyGameList.Helper;
+using Newtonsoft.Json;
+using psdtest.Domain.Response;
 
 namespace MyGameList.Controllers
 {
@@ -33,9 +36,13 @@ namespace MyGameList.Controllers
                     Username = user.Name,
                     Password = hash
                 };
-                var userId = UserManager.LoginUser(req);
-                if (userId != null)
+                var baseUrl = "https://" + HttpContext.Request.Host.Value + "/user_api/login";
+                var result = HttpHelper.Post(baseUrl,req).Result;
+                var response = JsonConvert.DeserializeObject<UserResponseDTO>(result.Content.ReadAsStringAsync().Result);
+
+                if (response != null)
                 {
+                    var userId = response.UserId;
                     HttpContext.Session.SetString("UserId", userId.ToString());
                     HttpContext.Session.SetString("UserName", user.Name);
                     return RedirectToAction("Index", "Game");

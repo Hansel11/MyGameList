@@ -2,6 +2,9 @@
 using MyGameList.Models;
 using MyGameList.WebService.Application;
 using MyGameList.Domain.Request;
+using MyGameList.Helper;
+using Newtonsoft.Json;
+using psdtest.Domain.Response;
 
 namespace MyGameList.Controllers
 {
@@ -19,16 +22,22 @@ namespace MyGameList.Controllers
             byte[] data = System.Text.Encoding.ASCII.GetBytes(user.Password);
             data = new System.Security.Cryptography.SHA256Managed().ComputeHash(data);
             var hash = System.Text.Encoding.ASCII.GetString(data);
+            
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
             var req = new UserRequestDTO
             {
                 Username = user.Name,
                 Password = hash
             };
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-            else if (UserManager.RegisterUser(req))
+            var baseUrl = "https://" + HttpContext.Request.Host.Value + "/user_api/register";
+            var result = HttpHelper.Post(baseUrl, req).Result;
+            var response = JsonConvert.DeserializeObject<UserResponseDTO>(result.Content.ReadAsStringAsync().Result);
+
+            if (response!=null)
             {
                 TempData["msg"] = "<script>alert('User added succesfully');</script>";
                 return RedirectToAction("Index", "Login");

@@ -160,7 +160,7 @@ public class GameController : Controller
         return userId;
     }
 
-    public string GetApiUrl()
+    private string GetApiUrl()
     {
         return "https://" + HttpContext.Request.Host.Value + "/game_api/";
     }
